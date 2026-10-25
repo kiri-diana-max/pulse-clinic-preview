@@ -578,6 +578,12 @@ function renderBanner(){
   else if(state.ready && !state.db) b.innerHTML=`<div class="banner">Хранилище данных недоступно в этом окне. Откройте страницу на claude.ai, войдя в аккаунт. Пока можно <button class="link" data-demo="on">посмотреть пример</button>.</div>`;
   else b.innerHTML="";
 }
+  /* типограф: короткие слова не висят в конце строки, тире не уходит в начало */
+function typo(root){
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+    const re=/(^|[\s\u00A0(«„"])([а-яёa-z]{1,2})[ \t\n]+/gi; let n;
+    while((n=w.nextNode())){ let t=n.nodeValue, o=t; t=t.replace(re,"$1$2\u00A0").replace(re,"$1$2\u00A0").replace(/[ \t\n]+—/g,"\u00A0—"); if(t!==o) n.nodeValue=t; }
+  }
 function render(){
   $("#clinicName").textContent = state.demo? "Клиника TEPLOFF · пример" : (state.settings.name || "Пульс клиники");
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===state.tab)));
@@ -588,6 +594,7 @@ function render(){
   if(state.tab==="entry") renderEntry();
   if(state.tab==="history") renderHistory();
   if(state.tab==="settings") renderSettings();
+  if(state.tab!=="entry") typo(document.body);
 }
 function go(tab){ state.tab=tab; try{localStorage.setItem("pulse.tab",tab);}catch(e){} if(tab==="settings") state.sdraft=null; render(); window.scrollTo({top:0}); }
 

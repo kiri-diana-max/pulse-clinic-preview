@@ -148,6 +148,7 @@ section{padding-block:88px}
 .q h3{font:900 25px/1.15 var(--f-display);margin-bottom:10px}
 .q p{margin:0;color:var(--navy-2)}
 .q svg{width:96px;height:96px}
+@media (max-width:600px){.q{grid-template-columns:minmax(0,1fr);gap:12px;padding:26px 22px 24px}.q svg{width:64px;height:64px}.q h3{font-size:23px}}
 .ill{fill:none;stroke:var(--navy);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .ill .r{stroke:var(--red)}.ill .fr{fill:var(--red);stroke:none}.ill .fn{fill:var(--navy);stroke:none}.ill .fk{fill:var(--kraft);stroke:none}
 
@@ -476,6 +477,12 @@ footer a{color:#dfe5f2}
   document.querySelectorAll("[data-cabinet]").forEach(a => a.href = CABINET_URL);
   document.querySelectorAll("[data-cabinet-demo]").forEach(a => a.href = CABINET_DEMO_URL);
 
+  /* типограф: короткие слова не висят в конце строки, тире не уходит в начало */
+  function typo(root){
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+    const re=/(^|[\s\u00A0(«„"])([а-яёa-z]{1,2})[ \t\n]+/gi; let n;
+    while((n=w.nextNode())){ let t=n.nodeValue, o=t; t=t.replace(re,"$1$2\u00A0").replace(re,"$1$2\u00A0").replace(/[ \t\n]+—/g,"\u00A0—"); if(t!==o) n.nodeValue=t; }
+  }
   /* torn paper edges */
   function torn(el, amp){ const pts=[]; const n=26;
     for(let i=0;i<=n;i++) pts.push(`${(i/n*100).toFixed(1)}% ${(Math.random()*amp).toFixed(1)}%`);
@@ -527,8 +534,10 @@ footer a{color:#dfe5f2}
     if(m.routed<3) s.push(["warn",`Из хирургии в терапию и ортопедию записали только ${m.routed} пациентов.`]);
     if(!s.length) s.push(["good","Красных сигналов нет."]);
     $("sigs").innerHTML=s.map(([t,h])=>`<div class="sig ${t}">${h}</div>`).join("");
+    if(typeof typo==="function") typo(document.querySelector(".board"));
   }
   show(2);
+  typo(document.body);
 })();
 </script>
 </body>
